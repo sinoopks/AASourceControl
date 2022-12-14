@@ -1,6 +1,17 @@
 param(
     [object]$WebhookData
 )
-$WebhookData.WebhookName | ConvertFrom-Json | Format-List *
-$WebhookData.RequestHeaders | ConvertFrom-Json | Format-List *
-$WebhookData.RequestBody | ConvertFrom-Json | Format-List *
+
+Connect-AzAccount -Identity
+
+$RequestBody = $WebhookData.RequestBody | ConvertFrom-Json
+
+$DateCreated = [datetime]$RequestBody.eventTime
+$tag = @{
+    MonthCreated = $DateCreated.Month
+    DayCreated   = $DateCreated.Day
+    YearCreated  = $DateCreated.Year
+}
+
+
+Update-AzTag -ResourceId $RequestBody.Subject -Operation Merge -Tag $tag 
